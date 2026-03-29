@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: smart-repeater-dashboard
+    env: python
+    buildCommand: ""
+    startCommand: gunicorn app:app

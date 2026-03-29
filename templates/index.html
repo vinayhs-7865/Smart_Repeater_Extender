@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body { margin:0; font-family:Arial; background:#0f172a; color:white; }
+header { text-align:center; padding:20px; font-size:24px; }
+
+.container {
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+padding:20px;
+}
+
+.card {
+background:#1e293b;
+padding:20px;
+border-radius:10px;
+}
+
+button {
+padding:10px;
+margin:5px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+.primary { background:#3b82f6; color:white; }
+.danger { background:red; color:white; }
+</style>
+</head>
+
+<body>
+
+<header>Smart Repeater Dashboard</header>
+
+<div style="text-align:center;">
+<button class="primary" onclick="goDevices()">Devices</button>
+<button class="primary" onclick="goBlocked()">Blocked</button>
+<button class="primary" onclick="goLogs()">Logs</button>
+<button class="danger" onclick="logout()">Logout</button>
+</div>
+
+<div class="container">
+<div class="card"><h3>CPU</h3><canvas id="cpuChart"></canvas></div>
+<div class="card"><h3>RAM</h3><canvas id="ramChart"></canvas></div>
+<div class="card"><h3>Temp</h3><p id="temp"></p></div>
+<div class="card"><h3>Signal</h3><p id="signal"></p></div>
+</div>
+
+<div class="container">
+<div class="card"><h3>Status</h3><p id="status"></p></div>
+<div class="card"><h3>Devices</h3><div id="devices"></div></div>
+<div class="card"><h3>Blocked</h3><div id="blocked"></div></div>
+</div>
+
+<script>
+let cpu=[], ram=[], labels=[];
+let prevDevices=[];
+
+const cpuChart=new Chart(document.getElementById('cpuChart'),{
+type:'line',
+data:{labels:labels,datasets:[{data:cpu,borderColor:'blue'}]},
+options:{animation:false,scales:{y:{min:0,max:100}}}
+});
+
+const ramChart=new Chart(document.getElementById('ramChart'),{
+type:'line',
+data:{labels:labels,datasets:[{data:ram,borderColor:'green'}]},
+options:{animation:false,scales:{y:{min:0,max:100}}}
+});
+
+function alertNew(device){
+alert("⚠ New Device Connected:\n"+device);
+}
+
+function update(){
+fetch('/stats').then(r=>r.json()).then(d=>{
+
+cpu.push(d.cpu); ram.push(d.ram); labels.push("");
+if(cpu.length>20){cpu.shift();ram.shift();labels.shift();}
+
+cpuChart.update(); ramChart.update();
+
+document.getElementById("temp").innerText=d.temp;
+document.getElementById("signal").innerText=d.signal;
+
+document.getElementById("status").innerText =
+d.devices.length ? "Active" : "No Devices";
+
+// NEW DEVICE ALERT
+d.devices.forEach(dev=>{
+if(!prevDevices.includes(dev)){
+alertNew(dev);
+}
+});
+prevDevices=[...d.devices];
+
+document.getElementById("devices").innerHTML = d.devices.join("<br>") || "None";
+document.getElementById("blocked").innerHTML = d.blocked.join("<br>") || "None";
+
+});
+}
+
+function goDevices(){ window.location.href="/devices"; }
+function goBlocked(){ window.location.href="/blocked"; }
+function goLogs(){ window.location.href="/logs"; }
+function logout(){ window.location.href="/logout"; }
+
+setInterval(update,2000);
+update();
+</script>
+
+</body>
+</html>
