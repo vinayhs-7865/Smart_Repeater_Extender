@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Blocked</title>
+</head>
+<body style="background:#0f172a;color:white;font-family:Arial;">
+
+<h2>Blocked Devices</h2>
+<div id="list"></div>
+
+<button onclick="goBack()">Back</button>
+
+<script>
+function load(){
+fetch('/stats').then(r=>r.json()).then(d=>{
+let html="";
+d.blocked.forEach(mac=>{
+html+=`${mac} <button onclick="unblock('${mac}')">Unblock</button><br>`;
+});
+document.getElementById("list").innerHTML=html || "None";
+});
+}
+
+function unblock(mac){ fetch('/unblock/'+mac); }
+function goBack(){ window.location.href="/"; }
+
+setInterval(load,2000);
+load();
+</script>
+
+</body>
+</html>

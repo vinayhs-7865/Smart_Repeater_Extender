@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Logs</title>
+</head>
+<body style="background:#0f172a;color:white;font-family:Arial;">
+
+<h2>📜 Activity Logs</h2>
+<div id="logs"></div>
+
+<button onclick="goBack()">Back</button>
+
+<script>
+function load(){
+fetch('/logs').then(r=>r.json()).then(d=>{
+let html="";
+d.logs.forEach(log=>{
+html += log + "<br>";
+});
+document.getElementById("logs").innerHTML = html;
+});
+}
+
+function goBack(){
+window.location.href="/";
+}
+
+setInterval(load,2000);
+load();
+</script>
+
+</body>
+</html>

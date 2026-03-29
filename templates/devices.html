@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Devices</title>
+</head>
+
+<body style="background:#0f172a;color:white;font-family:Arial;">
+
+<h2>📱 Connected Devices</h2>
+
+<div id="list"></div>
+
+<br>
+<button onclick="goBack()">⬅ Back</button>
+
+<script>
+function load(){
+fetch('/stats')
+.then(r=>r.json())
+.then(data=>{
+
+let html = "";
+
+if(data.devices.length === 0){
+html = "<p>No devices connected</p>";
+}
+
+data.devices.forEach(device => {
+
+let mac = device.split("(")[1].replace(")", "");
+
+html += `
+<div style="margin-bottom:10px;">
+${device}
+<br>
+<button onclick="allow('${mac}')">✅ Allow</button>
+<button onclick="block('${mac}')">🚫 Block</button>
+</div>
+`;
+});
+
+document.getElementById("list").innerHTML = html;
+
+});
+}
+
+function allow(mac){
+fetch('/allow/' + mac);
+}
+
+function block(mac){
+fetch('/block/' + mac);
+}
+
+function goBack(){
+window.location.href = "/";
+}
+
+setInterval(load, 2000);
+load();
+</script>
+
+</body>
+</html>
